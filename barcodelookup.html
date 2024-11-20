@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>New Balance Product Details - Barcode Lookup</title>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+		<link rel="stylesheet" href="./assets/styles.css" />
+	</head>
+
+	<body>
+		<nav class="menu">
+			<a href="/" class="menu-item">Home</a>
+			<a href="/datafiniti.html" class="menu-item">datafiniti</a>
+			<a href="/upcitemdb.html" class="menu-item">upcitemdb</a>
+			<a href="/barcodelookup.html" class="menu-item active">barcodelookup</a>
+			<a href="/barcodespider.html" class="menu-item">barcodespider</a>
+		</nav>
+		<div class="product-container">
+			<div class="header">
+				<div class="product-images">
+					<img
+						id="productImage"
+						class="product-image"
+						alt="New Balance Product"
+					/>
+				</div>
+				<div class="product-info">
+					<h1 id="productName"></h1>
+					<div class="price-range" id="priceRange"></div>
+					<div class="description" id="productDescription"></div>
+					<div class="metadata">
+						<div>Brand: <span id="brand"></span></div>
+						<div>Model: <span id="model"></span></div>
+						<div>MPN: <span id="mpn"></span></div>
+						<div>Barcode: <span id="barcode"></span></div>
+						<div>Last Updated: <span id="lastUpdate"></span></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="tabs">
+				<button class="tab active" onclick="showTab('details')">
+					Product Details
+				</button>
+				<button class="tab" onclick="showTab('stores')">Store Prices</button>
+				<button class="tab" onclick="showTab('specs')">Specifications</button>
+			</div>
+
+			<div id="details" class="tab-content active">
+				<div class="details-grid">
+					<div class="detail-item">
+						<strong>Category</strong>
+						<span id="categoryValue"></span>
+					</div>
+					<div class="detail-item">
+						<strong>Gender</strong>
+						<span id="genderValue"></span>
+					</div>
+					<div class="detail-item">
+						<strong>Age Group</strong>
+						<span id="ageGroupValue"></span>
+					</div>
+					<div class="detail-item">
+						<strong>Color</strong>
+						<span id="colorValue"></span>
+					</div>
+				</div>
+
+				<h2>Materials & Construction</h2>
+				<div class="features-grid">
+					<div class="feature-card">
+						<strong>Materials</strong>
+						<div id="materialValue"></div>
+					</div>
+					<div class="feature-card">
+						<strong>Size</strong>
+						<div id="sizeValue"></div>
+					</div>
+					<div class="feature-card">
+						<strong>Weight</strong>
+						<div id="weightValue"></div>
+					</div>
+				</div>
+			</div>
+
+			<div id="stores" class="tab-content">
+				<div class="price-filters">
+					<select id="currencyFilter" onchange="filterStores()">
+						<option value="all">All Currencies</option>
+					</select>
+					<select id="countryFilter" onchange="filterStores()">
+						<option value="all">All Countries</option>
+					</select>
+				</div>
+				<div id="storesList" class="merchants-list"></div>
+			</div>
+
+			<div id="specs" class="tab-content">
+				<div class="specs-grid">
+					<div class="spec-group">
+						<h2>Product Identifiers</h2>
+						<div id="identifiers" class="sku-list"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			async function fetchData() {
+				const response = await fetch("./assets/barcodelookup.json");
+				const data = await response.json();
+				if (data.products && data.products.length > 0) {
+					displayData(data.products[0]);
+				}
+			}
+
+			function showTab(tabId) {
+				document
+					.querySelectorAll(".tab-content")
+					.forEach((tab) => (tab.style.display = "none"));
+				document
+					.querySelectorAll(".tab")
+					.forEach((tab) => tab.classList.remove("active"));
+				document.getElementById(tabId).style.display = "block";
+				document
+					.querySelector(`button[onclick="showTab('${tabId}')"]`)
+					.classList.add("active");
+			}
+
+			function displayData(product) {
+				// Basic Info
+				document.getElementById("productName").textContent = product.title;
+				document.getElementById("productDescription").textContent =
+					product.description;
+				document.getElementById("productImage").src =
+					product.images[0] || "/api/placeholder/300/300";
+
+				// Metadata
+				document.getElementById("brand").textContent = product.brand;
+				document.getElementById("model").textContent = product.model;
+				document.getElementById("mpn").textContent = product.mpn;
+				document.getElementById("barcode").textContent = product.barcode_number;
+				document.getElementById("lastUpdate").textContent = new Date(
+					product.last_update
+				).toLocaleDateString();
+
+				// Details
+				document.getElementById("categoryValue").textContent = product.category;
+				document.getElementById("genderValue").textContent = product.gender;
+				document.getElementById("ageGroupValue").textContent =
+					product.age_group;
+				document.getElementById("colorValue").textContent = product.color;
+				document.getElementById("materialValue").textContent = product.material;
+				document.getElementById("sizeValue").textContent = product.size;
+				document.getElementById(
+					"weightValue"
+				).textContent = `${product.weight} kg`;
+
+				// Product Identifiers
+				const identifiersContainer = document.getElementById("identifiers");
+				product.barcode_formats.split(", ").forEach((format) => {
+					const div = document.createElement("div");
+					div.className = "sku-item";
+					div.textContent = format;
+					identifiersContainer.appendChild(div);
+				});
+
+				// Store Prices
+				const storesContainer = document.getElementById("storesList");
+				const currencyFilter = document.getElementById("currencyFilter");
+				const countryFilter = document.getElementById("countryFilter");
+
+				// Collect unique currencies and countries
+				const currencies = new Set();
+				const countries = new Set();
+				product.stores.forEach((store) => {
+					currencies.add(store.currency);
+					countries.add(store.country);
+				});
+
+				// Populate filters
+				currencies.forEach((currency) => {
+					const option = document.createElement("option");
+					option.value = currency;
+					option.textContent = currency;
+					currencyFilter.appendChild(option);
+				});
+
+				countries.forEach((country) => {
+					const option = document.createElement("option");
+					option.value = country;
+					option.textContent = country;
+					countryFilter.appendChild(option);
+				});
+
+				// Display stores
+				displayStores(product.stores);
+
+				// Calculate and display price range
+				const prices = product.stores
+					.map((store) => parseFloat(store.price))
+					.filter((price) => !isNaN(price));
+				if (prices.length > 0) {
+					const minPrice = Math.min(...prices);
+					const maxPrice = Math.max(...prices);
+					document.getElementById(
+						"priceRange"
+					).textContent = `${minPrice.toFixed(2)} - ${maxPrice.toFixed(
+						2
+					)} (Various Currencies)`;
+				}
+			}
+
+			function displayStores(stores) {
+				const storesContainer = document.getElementById("storesList");
+				storesContainer.innerHTML = "";
+
+				const currencyFilter = document.getElementById("currencyFilter").value;
+				const countryFilter = document.getElementById("countryFilter").value;
+
+				const filteredStores = stores.filter(
+					(store) =>
+						(currencyFilter === "all" || store.currency === currencyFilter) &&
+						(countryFilter === "all" || store.country === countryFilter)
+				);
+
+				filteredStores.forEach((store) => {
+					const card = document.createElement("div");
+					card.className = "merchant-card";
+					card.innerHTML = `
+                    <strong>${store.name}</strong>
+                    <div>Price: ${store.currency_symbol}${store.price}</div>
+                    ${
+											store.sale_price
+												? `<div class="sale">Sale: ${store.currency_symbol}${store.sale_price}</div>`
+												: ""
+										}
+                    <div>Country: ${store.country}</div>
+                    ${
+											store.condition
+												? `<div>Condition: ${store.condition}</div>`
+												: ""
+										}
+                    ${
+											store.availability
+												? `<div>Availability: ${store.availability}</div>`
+												: ""
+										}
+                    <div><small>Updated: ${new Date(
+											store.last_update
+										).toLocaleDateString()}</small></div>
+                `;
+					storesContainer.appendChild(card);
+				});
+			}
+
+			// Filter stores when selection changes
+			function filterStores() {
+				const response = fetch("./assets/barcodelookup.json")
+					.then((response) => response.json())
+					.then((data) => {
+						if (data.products && data.products.length > 0) {
+							displayStores(data.products[0].stores);
+						}
+					});
+			}
+
+			fetchData();
+		</script>
+	</body>
+</html>

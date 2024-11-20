@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>New Balance Product Details - Barcode Spider</title>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+		<link rel="stylesheet" href="./assets/styles.css" />
+	</head>
+
+	<body>
+		<nav class="menu">
+			<a href="/" class="menu-item">Home</a>
+			<a href="/datafiniti.html" class="menu-item">datafiniti</a>
+			<a href="/upcitemdb.html" class="menu-item">upcitemdb</a>
+			<a href="/barcodelookup.html" class="menu-item">barcodelookup</a>
+			<a href="/barcodespider.html" class="menu-item active">barcodespider</a>
+		</nav>
+		<div class="product-container">
+			<div class="header">
+				<div class="product-images">
+					<img
+						id="productImage"
+						class="product-image"
+						alt="New Balance Product"
+					/>
+				</div>
+				<div class="product-info">
+					<h1 id="productName"></h1>
+					<div class="price-range" id="priceRange"></div>
+					<div class="metadata">
+						<div class="metadata-grid">
+							<div>
+								<strong>Identifiers</strong>
+								<div>UPC: <span id="upc"></span></div>
+								<div>EAN: <span id="ean"></span></div>
+								<div>ASIN: <span id="asin"></span></div>
+								<div>MPN: <span id="mpn"></span></div>
+							</div>
+							<div>
+								<strong>Product Details</strong>
+								<div>Brand: <span id="brand"></span></div>
+								<div>Model: <span id="model"></span></div>
+								<div>Color: <span id="color"></span></div>
+								<div>Size: <span id="size"></span></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="tabs">
+				<button class="tab active" onclick="showTab('details')">
+					Product Details
+				</button>
+				<button class="tab" onclick="showTab('stores')">Store Listings</button>
+			</div>
+
+			<div id="details" class="tab-content active">
+				<div class="features-grid">
+					<div class="feature-card">
+						<strong>Category</strong>
+						<div id="category"></div>
+						<div id="parentCategory"></div>
+					</div>
+					<div class="feature-card">
+						<strong>Manufacturer</strong>
+						<div id="manufacturer"></div>
+					</div>
+					<div class="feature-card">
+						<strong>Weight</strong>
+						<div id="weight"></div>
+					</div>
+					<div class="feature-card">
+						<strong>Publisher</strong>
+						<div id="publisher"></div>
+					</div>
+				</div>
+			</div>
+
+			<div id="stores" class="tab-content">
+				<div id="storesList" class="merchants-list"></div>
+			</div>
+		</div>
+
+		<script>
+			async function fetchData() {
+				const response = await fetch("./assets/barcodespider.json");
+				const data = await response.json();
+				if (data.item_response.code === 200) {
+					displayData(data);
+				}
+			}
+
+			function showTab(tabId) {
+				document
+					.querySelectorAll(".tab-content")
+					.forEach((tab) => (tab.style.display = "none"));
+				document
+					.querySelectorAll(".tab")
+					.forEach((tab) => tab.classList.remove("active"));
+				document.getElementById(tabId).style.display = "block";
+				document
+					.querySelector(`button[onclick="showTab('${tabId}')"]`)
+					.classList.add("active");
+			}
+
+			function displayData(data) {
+				const attributes = data.item_attributes;
+
+				// Basic Info
+				document.getElementById("productName").textContent = attributes.title;
+				document.getElementById("productImage").src =
+					attributes.image || "/api/placeholder/300/300";
+
+				// Metadata - Identifiers
+				document.getElementById("upc").textContent = attributes.upc;
+				document.getElementById("ean").textContent = attributes.ean;
+				document.getElementById("asin").textContent = attributes.asin;
+				document.getElementById("mpn").textContent = attributes.mpn;
+
+				// Metadata - Product Details
+				document.getElementById("brand").textContent = attributes.brand;
+				document.getElementById("model").textContent = attributes.model;
+				document.getElementById("color").textContent = attributes.color;
+				document.getElementById("size").textContent = attributes.size;
+
+				// Details Tab
+				document.getElementById("category").textContent = attributes.category;
+				document.getElementById("parentCategory").textContent =
+					attributes.parent_category;
+				document.getElementById("manufacturer").textContent =
+					attributes.manufacturer;
+				document.getElementById("weight").textContent = attributes.weight;
+				document.getElementById("publisher").textContent = attributes.publisher;
+
+				// Price Range (from stores)
+				const prices = data.Stores.map((store) =>
+					parseFloat(store.price)
+				).filter((price) => !isNaN(price));
+				if (prices.length > 0) {
+					const minPrice = Math.min(...prices);
+					const maxPrice = Math.max(...prices);
+					if (minPrice === maxPrice) {
+						document.getElementById(
+							"priceRange"
+						).textContent = `$${minPrice.toFixed(2)}`;
+					} else {
+						document.getElementById(
+							"priceRange"
+						).textContent = `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
+					}
+				}
+
+				// Stores Tab
+				const storesContainer = document.getElementById("storesList");
+				data.Stores.forEach((store) => {
+					const card = document.createElement("div");
+					card.className = "merchant-card";
+					card.innerHTML = `
+                    <strong>${store.store_name}</strong>
+                    <div class="store-image">
+                        <img src="${store.image || "/api/placeholder/100/100"}" 
+                             alt="${store.title}"
+                             style="max-width: 100px; height: auto;">
+                    </div>
+                    <div class="store-details">
+                        <div class="price">Price: ${store.currency} ${
+						store.price
+					}</div>
+                        <div class="store-title">${store.title}</div>
+                        <div class="update-time">
+                            <small>Updated: ${new Date(
+															store.updated
+														).toLocaleDateString()}</small>
+                        </div>
+                    </div>
+                `;
+					storesContainer.appendChild(card);
+				});
+			}
+
+			fetchData();
+		</script>
+
+		<style>
+			.metadata-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+				gap: 20px;
+				margin-top: 20px;
+			}
+
+			.metadata-grid > div {
+				background: #f8f9fa;
+				padding: 15px;
+				border-radius: 6px;
+			}
+
+			.metadata-grid strong {
+				display: block;
+				margin-bottom: 10px;
+				color: #333;
+			}
+
+			.store-image {
+				margin: 10px 0;
+			}
+
+			.store-details {
+				margin-top: 10px;
+			}
+
+			.price {
+				color: #2f5acf;
+				font-weight: 500;
+				margin-bottom: 5px;
+			}
+
+			.store-title {
+				font-size: 0.9em;
+				margin-bottom: 5px;
+			}
+
+			.update-time {
+				color: #666;
+			}
+		</style>
+	</body>
+</html>

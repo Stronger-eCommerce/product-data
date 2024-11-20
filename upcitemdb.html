@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>New Balance Product Details - UPC Item DB</title>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+		<link rel="stylesheet" href="./assets/styles.css" />
+	</head>
+
+	<body>
+		<nav class="menu">
+			<a href="/" class="menu-item">Home</a>
+			<a href="/datafiniti.html" class="menu-item">datafiniti</a>
+			<a href="/upcitemdb.html" class="menu-item active">upcitemdb</a>
+			<a href="/barcodelookup.html" class="menu-item">barcodelookup</a>
+			<a href="/barcodespider.html" class="menu-item">barcodespider</a>
+		</nav>
+		<div class="product-container">
+			<div class="header">
+				<div class="product-images">
+					<img
+						id="productImage"
+						class="product-image"
+						alt="New Balance Product"
+					/>
+					<div class="image-thumbnails" id="imageThumbnails"></div>
+				</div>
+				<div class="product-info">
+					<h1 id="productName"></h1>
+					<div class="price-range" id="priceRange"></div>
+					<div class="description" id="productDescription"></div>
+					<div class="metadata">
+						<div>Brand: <span id="brand"></span></div>
+						<div>Model: <span id="model"></span></div>
+						<div>EAN: <span id="ean"></span></div>
+						<div>UPC: <span id="upc"></span></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="tabs">
+				<button class="tab active" onclick="showTab('details')">Details</button>
+				<button class="tab" onclick="showTab('offers')">Offers</button>
+				<button class="tab" onclick="showTab('images')">Images</button>
+			</div>
+
+			<div id="details" class="tab-content active">
+				<h2>Product Details</h2>
+				<div class="details-grid">
+					<div class="detail-item">
+						<strong>Color:</strong>
+						<span id="colorValue"></span>
+					</div>
+					<div class="detail-item">
+						<strong>Size:</strong>
+						<span id="sizeValue"></span>
+					</div>
+					<div class="detail-item">
+						<strong>Weight:</strong>
+						<span id="weightValue"></span>
+					</div>
+					<div class="detail-item">
+						<strong>Category:</strong>
+						<span id="categoryValue"></span>
+					</div>
+				</div>
+
+				<h2>Price History</h2>
+				<div class="price-history">
+					<div>Lowest Recorded: <span id="lowestPrice"></span></div>
+					<div>Highest Recorded: <span id="highestPrice"></span></div>
+				</div>
+			</div>
+
+			<div id="offers" class="tab-content">
+				<div id="offersList" class="merchants-list"></div>
+			</div>
+
+			<div id="images" class="tab-content">
+				<div id="imageGallery" class="image-gallery"></div>
+			</div>
+		</div>
+
+		<script>
+			async function fetchData() {
+				const response = await fetch("./assets/upcitemdb.json");
+				const data = await response.json();
+				if (data.items && data.items.length > 0) {
+					displayData(data.items[0]);
+				}
+			}
+
+			function showTab(tabId) {
+				document
+					.querySelectorAll(".tab-content")
+					.forEach((tab) => (tab.style.display = "none"));
+				document
+					.querySelectorAll(".tab")
+					.forEach((tab) => tab.classList.remove("active"));
+				document.getElementById(tabId).style.display = "block";
+				document
+					.querySelector(`button[onclick="showTab('${tabId}')"]`)
+					.classList.add("active");
+			}
+
+			function setMainImage(url) {
+				document.getElementById("productImage").src =
+					url || "/api/placeholder/300/300";
+			}
+
+			function displayData(item) {
+				// Basic Info
+				document.getElementById("productName").textContent = item.title;
+				document.getElementById("productDescription").textContent =
+					item.description;
+				setMainImage(item.images[0]);
+
+				// Metadata
+				document.getElementById("brand").textContent = item.brand;
+				document.getElementById("model").textContent = item.model;
+				document.getElementById("ean").textContent = item.ean;
+				document.getElementById("upc").textContent = item.upc;
+
+				// Details
+				document.getElementById("colorValue").textContent =
+					item.color || "Not specified";
+				document.getElementById("sizeValue").textContent =
+					item.size || "Not specified";
+				document.getElementById("weightValue").textContent =
+					item.weight || "Not specified";
+				document.getElementById("categoryValue").textContent =
+					item.category || "Not specified";
+
+				// Price History
+				document.getElementById("lowestPrice").textContent =
+					item.lowest_recorded_price
+						? `$${item.lowest_recorded_price.toFixed(2)}`
+						: "N/A";
+				document.getElementById("highestPrice").textContent =
+					item.highest_recorded_price
+						? `$${item.highest_recorded_price.toFixed(2)}`
+						: "N/A";
+
+				// Current price range from offers
+				const prices = item.offers
+					.map((offer) => offer.price)
+					.filter((price) => price);
+				if (prices.length > 0) {
+					const minPrice = Math.min(...prices);
+					const maxPrice = Math.max(...prices);
+					document.getElementById(
+						"priceRange"
+					).textContent = `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
+				}
+
+				// Offers
+				const offersContainer = document.getElementById("offersList");
+				item.offers.forEach((offer) => {
+					const card = document.createElement("div");
+					card.className = "merchant-card";
+					card.innerHTML = `
+                    <strong>${offer.merchant}</strong>
+                    <div>Price: $${offer.price}</div>
+                    ${
+											offer.list_price
+												? `<div>List Price: $${offer.list_price}</div>`
+												: ""
+										}
+                    <div>${
+											offer.shipping || "Shipping info not available"
+										}</div>
+                    <div>Condition: ${offer.condition}</div>
+                    ${
+											offer.availability
+												? `<div>Availability: ${offer.availability}</div>`
+												: ""
+										}
+                    <div><small>Updated: ${new Date(
+											offer.updated_t * 1000
+										).toLocaleDateString()}</small></div>
+                `;
+					offersContainer.appendChild(card);
+				});
+
+				// Image Gallery
+				const galleryContainer = document.getElementById("imageGallery");
+				const thumbnailsContainer = document.getElementById("imageThumbnails");
+
+				item.images.forEach((url, index) => {
+					// Thumbnail
+					const thumbnail = document.createElement("img");
+					thumbnail.src = url;
+					thumbnail.alt = `Product thumbnail ${index + 1}`;
+					thumbnail.className = "thumbnail";
+					thumbnail.onclick = () => setMainImage(url);
+					thumbnailsContainer.appendChild(thumbnail);
+
+					// Gallery
+					const galleryImage = document.createElement("img");
+					galleryImage.src = url;
+					galleryImage.alt = `Product image ${index + 1}`;
+					galleryImage.className = "gallery-image";
+					galleryContainer.appendChild(galleryImage);
+				});
+			}
+
+			fetchData();
+		</script>
+	</body>
+</html>

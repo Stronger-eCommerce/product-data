@@ -3,389 +3,232 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>New Balance Product Details</title>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
-		<style>
-			body {
-				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-					sans-serif;
-				max-width: 1200px;
-				margin: 0 auto;
-				padding: 20px;
-				background: #f5f5f5;
-			}
-			.product-container {
-				background: white;
-				border-radius: 8px;
-				padding: 20px;
-				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-			}
-			.header {
-				display: flex;
-				gap: 20px;
-				margin-bottom: 30px;
-			}
-			.product-image {
-				width: 300px;
-				border-radius: 8px;
-			}
-			.product-info {
-				flex: 1;
-			}
-			h1,
-			h2,
-			h3 {
-				color: #333;
-				margin: 0 0 10px 0;
-			}
-			.price-range {
-				font-size: 1.2em;
-				color: #2f5acf;
-				margin-bottom: 15px;
-			}
-			.description {
-				line-height: 1.6;
-				margin-bottom: 20px;
-			}
-			.tabs {
-				display: flex;
-				gap: 10px;
-				border-bottom: 1px solid #ddd;
-				margin: 20px 0;
-			}
-			.tab {
-				padding: 10px 20px;
-				cursor: pointer;
-				border: none;
-				background: none;
-				border-bottom: 2px solid transparent;
-			}
-			.tab.active {
-				border-bottom: 2px solid #2f5acf;
-				color: #2f5acf;
-			}
-			.tab-content {
-				display: none;
-			}
-			.tab-content.active {
-				display: block;
-			}
-			.colors-grid {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 10px;
-				margin-bottom: 20px;
-			}
-			.color-chip {
-				padding: 6px 12px;
-				background: #eee;
-				border-radius: 15px;
-				font-size: 0.9em;
-			}
-			.sizes-grid {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 10px;
-				margin-bottom: 20px;
-			}
-			.size-chip {
-				padding: 10px 15px;
-				border: 1px solid #ddd;
-				border-radius: 4px;
-				text-align: center;
-			}
-			.merchants-list {
-				display: grid;
-				grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-				gap: 15px;
-			}
-			.merchant-card {
-				padding: 15px;
-				border: 1px solid #ddd;
-				border-radius: 4px;
-			}
-			.sku-list {
-				display: grid;
-				grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-				gap: 10px;
-			}
-			.sku-item {
-				padding: 8px;
-				background: #f8f9fa;
-				border-radius: 4px;
-				font-family: monospace;
-			}
-			.review {
-				border-bottom: 1px solid #eee;
-				padding: 15px 0;
-			}
-			.review-header {
-				display: flex;
-				justify-content: space-between;
-				margin-bottom: 10px;
-			}
-			.rating {
-				color: #f39c12;
-			}
-			.features-grid {
-				display: grid;
-				grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-				gap: 15px;
-			}
-			.feature-card {
-				background: #f8f9fa;
-				padding: 15px;
-				border-radius: 6px;
-			}
-			.chart-container {
-				margin: 20px 0;
-				height: 400px;
-			}
-			.metadata {
-				font-size: 0.9em;
-				color: #666;
-				margin-top: 20px;
-			}
-		</style>
+		<title>Product Data Sources</title>
+		<link rel="stylesheet" href="./assets/styles.css" />
 	</head>
 	<body>
+		<nav class="menu">
+			<a href="/" class="menu-item active">Home</a>
+			<a href="/datafiniti.html" class="menu-item">datafiniti</a>
+			<a href="/upcitemdb.html" class="menu-item">upcitemdb</a>
+			<a href="/barcodelookup.html" class="menu-item">barcodelookup</a>
+			<a href="/barcodespider.html" class="menu-item">barcodespider</a>
+		</nav>
+
 		<div class="product-container">
-			<div class="header">
-				<div class="product-images">
-					<img id="productImage" class="product-image" alt="New Balance 574" />
+			<div class="home-header">
+				<h1>Product Data Sources</h1>
+				<p>Compare product information across multiple data providers</p>
+			</div>
+
+			<div class="data-sources-grid">
+				<div
+					class="data-source-card"
+					onclick="window.location.href='/datafiniti.html'"
+				>
+					<div class="card-header">
+						<h2>Datafiniti</h2>
+						<div class="badge">Comprehensive</div>
+					</div>
+					<div class="card-content">
+						<ul>
+							<li>Detailed product specifications</li>
+							<li>Price history and trends</li>
+							<li>Customer reviews and ratings</li>
+							<li>Multiple merchant listings</li>
+						</ul>
+					</div>
 				</div>
-				<div class="product-info">
-					<h1 id="productName"></h1>
-					<div class="price-range" id="priceRange"></div>
-					<div class="description" id="productDescription"></div>
-					<div class="metadata">
-						<div>EAN: <span id="ean"></span></div>
-						<div>Added: <span id="dateAdded"></span></div>
-						<div>Updated: <span id="dateUpdated"></span></div>
+
+				<div
+					class="data-source-card"
+					onclick="window.location.href='/upcitemdb.html'"
+				>
+					<div class="card-header">
+						<h2>UPC Item DB</h2>
+						<div class="badge">Price Focus</div>
+					</div>
+					<div class="card-content">
+						<ul>
+							<li>Global price comparisons</li>
+							<li>Historical price tracking</li>
+							<li>Merchant availability</li>
+							<li>Multiple product images</li>
+						</ul>
+					</div>
+				</div>
+
+				<div
+					class="data-source-card"
+					onclick="window.location.href='/barcodelookup.html'"
+				>
+					<div class="card-header">
+						<h2>Barcode Lookup</h2>
+						<div class="badge">Market Data</div>
+					</div>
+					<div class="card-content">
+						<ul>
+							<li>International pricing</li>
+							<li>Store availability</li>
+							<li>Currency conversion</li>
+							<li>Regional variations</li>
+						</ul>
+					</div>
+				</div>
+
+				<div
+					class="data-source-card"
+					onclick="window.location.href='/barcodespider.html'"
+				>
+					<div class="card-header">
+						<h2>Barcode Spider</h2>
+						<div class="badge">Quick Info</div>
+					</div>
+					<div class="card-content">
+						<ul>
+							<li>Essential product details</li>
+							<li>Current market prices</li>
+							<li>Store listings</li>
+							<li>Product identifiers</li>
+						</ul>
 					</div>
 				</div>
 			</div>
 
-			<div class="tabs">
-				<button class="tab active" onclick="showTab('details')">Details</button>
-				<button class="tab" onclick="showTab('prices')">
-					Prices & Merchants
-				</button>
-				<button class="tab" onclick="showTab('reviews')">Reviews</button>
-				<button class="tab" onclick="showTab('technical')">
-					Technical Info
-				</button>
-			</div>
-
-			<div id="details" class="tab-content active">
-				<h2>Colors Available</h2>
-				<div class="colors-grid" id="colors"></div>
-
-				<h2>Sizes Available</h2>
-				<div class="sizes-grid" id="sizes"></div>
-
-				<h2>Features</h2>
-				<div class="features-grid" id="features"></div>
-			</div>
-
-			<div id="prices" class="tab-content">
-				<div class="chart-container">
-					<canvas id="priceChart"></canvas>
+			<div class="product-info-panel">
+				<div class="info-content">
+					<h2>New Balance 574 Sneaker</h2>
+					<p>Currently viewing data for:</p>
+					<div class="product-identifiers">
+						<div><strong>UPC:</strong> 739655530234</div>
+						<div><strong>EAN:</strong> 0739655530234</div>
+						<div><strong>Model:</strong> WL574EW</div>
+					</div>
 				</div>
-
-				<h2>Current Offers</h2>
-				<div class="merchants-list" id="merchants"></div>
-			</div>
-
-			<div id="reviews" class="tab-content">
-				<div id="reviewStats"></div>
-				<div id="reviews-list"></div>
-			</div>
-
-			<div id="technical" class="tab-content">
-				<h2>SKU Numbers</h2>
-				<div class="sku-list" id="skus"></div>
-
-				<h2>Product IDs</h2>
-				<div>
-					<div>UPC: <span id="upc"></span></div>
-					<div>Website IDs: <span id="websiteIds"></span></div>
-				</div>
+				<img
+					src="/api/placeholder/300/300"
+					alt="New Balance 574"
+					class="panel-image"
+				/>
 			</div>
 		</div>
 
-		<script>
-			async function fetchData() {
-				const response = await fetch("./assets/data.json");
-				const data = await response.json();
-				displayData(data);
+		<style>
+			.home-header {
+				text-align: center;
+				margin-bottom: 40px;
 			}
 
-			function showTab(tabId) {
-				// Hide all tabs and remove active class
-				document
-					.querySelectorAll(".tab-content")
-					.forEach((tab) => (tab.style.display = "none"));
-				document
-					.querySelectorAll(".tab")
-					.forEach((tab) => tab.classList.remove("active"));
-
-				// Show selected tab and add active class
-				document.getElementById(tabId).style.display = "block";
-				document
-					.querySelector(`button[onclick="showTab('${tabId}')"]`)
-					.classList.add("active");
+			.home-header h1 {
+				font-size: 2.5em;
+				color: #2f5acf;
+				margin-bottom: 10px;
 			}
 
-			function displayData(data) {
-				// Basic Info
-				document.getElementById("productName").textContent = data.name;
-				document.getElementById("productImage").src =
-					data.imageURLs[0] || "/api/placeholder/300/300";
-				document.getElementById("productDescription").textContent =
-					data.descriptions[0]?.value || "No description available";
-
-				// Metadata
-				document.getElementById("ean").textContent = data.ean13;
-				document.getElementById("dateAdded").textContent = new Date(
-					data.dateAdded
-				).toLocaleDateString();
-				document.getElementById("dateUpdated").textContent = new Date(
-					data.dateUpdated
-				).toLocaleDateString();
-
-				// Colors
-				const colorsContainer = document.getElementById("colors");
-				data.colors.forEach((color) => {
-					const chip = document.createElement("span");
-					chip.className = "color-chip";
-					chip.textContent = color;
-					colorsContainer.appendChild(chip);
-				});
-
-				// Sizes
-				const sizesContainer = document.getElementById("sizes");
-				data.sizes
-					.sort((a, b) => parseFloat(a) - parseFloat(b))
-					.forEach((size) => {
-						const chip = document.createElement("div");
-						chip.className = "size-chip";
-						chip.textContent = size;
-						sizesContainer.appendChild(chip);
-					});
-
-				// Features
-				const featuresContainer = document.getElementById("features");
-				data.features.forEach((feature) => {
-					const card = document.createElement("div");
-					card.className = "feature-card";
-					card.innerHTML = `
-                    <strong>${feature.key}</strong>
-                    <div>${
-											Array.isArray(feature.value)
-												? feature.value.join(", ")
-												: feature.value
-										}</div>
-                `;
-					featuresContainer.appendChild(card);
-				});
-
-				// Price Chart
-				const priceData = data.prices
-					.filter((p) => p.dateSeen)
-					.sort((a, b) => new Date(a.dateSeen[0]) - new Date(b.dateSeen[0]));
-
-				new Chart(document.getElementById("priceChart"), {
-					type: "line",
-					data: {
-						labels: priceData.map((p) =>
-							new Date(p.dateSeen[0]).toLocaleDateString()
-						),
-						datasets: [
-							{
-								label: "Price History",
-								data: priceData.map((p) => p.amountMin),
-								borderColor: "#2f5acf",
-								tension: 0.1,
-							},
-						],
-					},
-					options: {
-						responsive: true,
-						maintainAspectRatio: false,
-						plugins: {
-							title: {
-								display: true,
-								text: "Price History",
-							},
-						},
-					},
-				});
-
-				// Merchants
-				const merchantsContainer = document.getElementById("merchants");
-				data.prices.forEach((price) => {
-					const card = document.createElement("div");
-					card.className = "merchant-card";
-					card.innerHTML = `
-                    <strong>${price.merchant}</strong>
-                    <div>Price: $${price.amountMin}</div>
-                    <div>${
-											price.shipping || "Shipping info not available"
-										}</div>
-                    ${price.color ? `<div>Color: ${price.color}</div>` : ""}
-                    ${
-											price.isSale
-												? `<div class="sale">Sale: ${price.offer}</div>`
-												: ""
-										}
-                `;
-					merchantsContainer.appendChild(card);
-				});
-
-				// Reviews
-				const reviewsContainer = document.getElementById("reviews-list");
-				data.reviews.forEach((review) => {
-					const reviewElement = document.createElement("div");
-					reviewElement.className = "review";
-					reviewElement.innerHTML = `
-                    <div class="review-header">
-                        <strong>${review.username || "Anonymous"}</strong>
-                        <span class="rating">★ ${review.rating}</span>
-                    </div>
-                    <div><strong>${review.title}</strong></div>
-                    <div>${review.text}</div>
-                    <div><small>${new Date(
-											review.date
-										).toLocaleDateString()}</small></div>
-                `;
-					reviewsContainer.appendChild(reviewElement);
-				});
-
-				// SKUs
-				const skusContainer = document.getElementById("skus");
-				data.skus.forEach((sku) => {
-					const skuElement = document.createElement("div");
-					skuElement.className = "sku-item";
-					skuElement.textContent = sku.value;
-					skusContainer.appendChild(skuElement);
-				});
-
-				// Technical IDs
-				document.getElementById("upc").textContent = data.upc.join(", ");
-				document.getElementById("websiteIds").textContent =
-					data.websiteIDs.join(", ");
-
-				// Calculate and display price range
-				const prices = data.prices.map((p) => p.amountMin).filter((p) => p);
-				const minPrice = Math.min(...prices);
-				const maxPrice = Math.max(...prices);
-				document.getElementById(
-					"priceRange"
-				).textContent = `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
+			.home-header p {
+				font-size: 1.2em;
+				color: #666;
 			}
 
-			fetchData();
-		</script>
+			.data-sources-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+				gap: 20px;
+				margin-bottom: 40px;
+			}
+
+			.data-source-card {
+				background: white;
+				border: 1px solid #eee;
+				border-radius: 8px;
+				padding: 20px;
+				cursor: pointer;
+				transition: transform 0.2s, box-shadow 0.2s;
+			}
+
+			.data-source-card:hover {
+				transform: translateY(-5px);
+				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+			}
+
+			.card-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 15px;
+			}
+
+			.card-header h2 {
+				margin: 0;
+				color: #333;
+			}
+
+			.badge {
+				background: #2f5acf;
+				color: white;
+				padding: 4px 8px;
+				border-radius: 12px;
+				font-size: 0.8em;
+			}
+
+			.card-content ul {
+				margin: 0;
+				padding-left: 20px;
+				color: #666;
+			}
+
+			.card-content li {
+				margin-bottom: 8px;
+			}
+
+			.product-info-panel {
+				background: linear-gradient(to right, #f8f9fa, #fff);
+				border-radius: 8px;
+				padding: 30px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-top: 40px;
+			}
+
+			.info-content {
+				flex: 1;
+			}
+
+			.info-content h2 {
+				color: #2f5acf;
+				margin: 0 0 15px 0;
+			}
+
+			.product-identifiers {
+				display: grid;
+				gap: 10px;
+				margin-top: 20px;
+				color: #666;
+			}
+
+			.panel-image {
+				width: 150px;
+				height: 150px;
+				object-fit: contain;
+				margin-left: 30px;
+				border-radius: 8px;
+			}
+
+			@media (max-width: 768px) {
+				.product-info-panel {
+					flex-direction: column;
+					text-align: center;
+				}
+
+				.panel-image {
+					margin: 20px 0 0 0;
+				}
+
+				.product-identifiers {
+					justify-content: center;
+				}
+			}
+		</style>
 	</body>
 </html>

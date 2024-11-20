@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>New Balance Product Details</title>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+		<link rel="stylesheet" href="./assets/styles.css" />
+	</head>
+
+	<body>
+		<nav class="menu">
+			<a href="/" class="menu-item">Home</a>
+			<a href="/datafiniti.html" class="menu-item active">datafiniti</a>
+			<a href="/upcitemdb.html" class="menu-item">upcitemdb</a>
+			<a href="/barcodelookup.html" class="menu-item">barcodelookup</a>
+			<a href="/barcodespider.html" class="menu-item">barcodespider</a>
+		</nav>
+		<div class="product-container">
+			<div class="header">
+				<div class="product-images">
+					<img id="productImage" class="product-image" alt="New Balance 574" />
+				</div>
+				<div class="product-info">
+					<h1 id="productName"></h1>
+					<div class="price-range" id="priceRange"></div>
+					<div class="description" id="productDescription"></div>
+					<div class="metadata">
+						<div>EAN: <span id="ean"></span></div>
+						<div>Added: <span id="dateAdded"></span></div>
+						<div>Updated: <span id="dateUpdated"></span></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="tabs">
+				<button class="tab active" onclick="showTab('details')">Details</button>
+				<button class="tab" onclick="showTab('prices')">
+					Prices & Merchants
+				</button>
+				<button class="tab" onclick="showTab('reviews')">Reviews</button>
+				<button class="tab" onclick="showTab('technical')">
+					Technical Info
+				</button>
+			</div>
+
+			<div id="details" class="tab-content active">
+				<h2>Colors Available</h2>
+				<div class="colors-grid" id="colors"></div>
+
+				<h2>Sizes Available</h2>
+				<div class="sizes-grid" id="sizes"></div>
+
+				<h2>Features</h2>
+				<div class="features-grid" id="features"></div>
+			</div>
+
+			<div id="prices" class="tab-content">
+				<div class="chart-container">
+					<canvas id="priceChart"></canvas>
+				</div>
+
+				<h2>Current Offers</h2>
+				<div class="merchants-list" id="merchants"></div>
+			</div>
+
+			<div id="reviews" class="tab-content">
+				<div id="reviewStats"></div>
+				<div id="reviews-list"></div>
+			</div>
+
+			<div id="technical" class="tab-content">
+				<h2>SKU Numbers</h2>
+				<div class="sku-list" id="skus"></div>
+
+				<h2>Product IDs</h2>
+				<div>
+					<div>UPC: <span id="upc"></span></div>
+					<div>Website IDs: <span id="websiteIds"></span></div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			async function fetchData() {
+				const response = await fetch("./assets/datafiniti.json");
+				const data = await response.json();
+				displayData(data);
+			}
+
+			function showTab(tabId) {
+				// Hide all tabs and remove active class
+				document
+					.querySelectorAll(".tab-content")
+					.forEach((tab) => (tab.style.display = "none"));
+				document
+					.querySelectorAll(".tab")
+					.forEach((tab) => tab.classList.remove("active"));
+
+				// Show selected tab and add active class
+				document.getElementById(tabId).style.display = "block";
+				document
+					.querySelector(`button[onclick="showTab('${tabId}')"]`)
+					.classList.add("active");
+			}
+
+			function displayData(data) {
+				// Basic Info
+				document.getElementById("productName").textContent = data.name;
+				document.getElementById("productImage").src =
+					data.imageURLs[0] || "/api/placeholder/300/300";
+				document.getElementById("productDescription").textContent =
+					data.descriptions[0]?.value || "No description available";
+
+				// Metadata
+				document.getElementById("ean").textContent = data.ean13;
+				document.getElementById("dateAdded").textContent = new Date(
+					data.dateAdded
+				).toLocaleDateString();
+				document.getElementById("dateUpdated").textContent = new Date(
+					data.dateUpdated
+				).toLocaleDateString();
+
+				// Colors
+				const colorsContainer = document.getElementById("colors");
+				data.colors.forEach((color) => {
+					const chip = document.createElement("span");
+					chip.className = "color-chip";
+					chip.textContent = color;
+					colorsContainer.appendChild(chip);
+				});
+
+				// Sizes
+				const sizesContainer = document.getElementById("sizes");
+				data.sizes
+					.sort((a, b) => parseFloat(a) - parseFloat(b))
+					.forEach((size) => {
+						const chip = document.createElement("div");
+						chip.className = "size-chip";
+						chip.textContent = size;
+						sizesContainer.appendChild(chip);
+					});
+
+				// Features
+				const featuresContainer = document.getElementById("features");
+				data.features.forEach((feature) => {
+					const card = document.createElement("div");
+					card.className = "feature-card";
+					card.innerHTML = `
+                    <strong>${feature.key}</strong>
+                    <div>${
+											Array.isArray(feature.value)
+												? feature.value.join(", ")
+												: feature.value
+										}</div>
+                `;
+					featuresContainer.appendChild(card);
+				});
+
+				// Price Chart
+				const priceData = data.prices
+					.filter((p) => p.dateSeen)
+					.sort((a, b) => new Date(a.dateSeen[0]) - new Date(b.dateSeen[0]));
+
+				new Chart(document.getElementById("priceChart"), {
+					type: "line",
+					data: {
+						labels: priceData.map((p) =>
+							new Date(p.dateSeen[0]).toLocaleDateString()
+						),
+						datasets: [
+							{
+								label: "Price History",
+								data: priceData.map((p) => p.amountMin),
+								borderColor: "#2f5acf",
+								tension: 0.1,
+							},
+						],
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							title: {
+								display: true,
+								text: "Price History",
+							},
+						},
+					},
+				});
+
+				// Merchants
+				const merchantsContainer = document.getElementById("merchants");
+				data.prices.forEach((price) => {
+					const card = document.createElement("div");
+					card.className = "merchant-card";
+					card.innerHTML = `
+                    <strong>${price.merchant}</strong>
+                    <div>Price: $${price.amountMin}</div>
+                    <div>${
+											price.shipping || "Shipping info not available"
+										}</div>
+                    ${price.color ? `<div>Color: ${price.color}</div>` : ""}
+                    ${
+											price.isSale
+												? `<div class="sale">Sale: ${price.offer}</div>`
+												: ""
+										}
+                `;
+					merchantsContainer.appendChild(card);
+				});
+
+				// Reviews
+				const reviewsContainer = document.getElementById("reviews-list");
+				data.reviews.forEach((review) => {
+					const reviewElement = document.createElement("div");
+					reviewElement.className = "review";
+					reviewElement.innerHTML = `
+                    <div class="review-header">
+                        <strong>${review.username || "Anonymous"}</strong>
+                        <span class="rating">★ ${review.rating}</span>
+                    </div>
+                    <div><strong>${review.title}</strong></div>
+                    <div>${review.text}</div>
+                    <div><small>${new Date(
+											review.date
+										).toLocaleDateString()}</small></div>
+                `;
+					reviewsContainer.appendChild(reviewElement);
+				});
+
+				// SKUs
+				const skusContainer = document.getElementById("skus");
+				data.skus.forEach((sku) => {
+					const skuElement = document.createElement("div");
+					skuElement.className = "sku-item";
+					skuElement.textContent = sku.value;
+					skusContainer.appendChild(skuElement);
+				});
+
+				// Technical IDs
+				document.getElementById("upc").textContent = data.upc.join(", ");
+				document.getElementById("websiteIds").textContent =
+					data.websiteIDs.join(", ");
+
+				// Calculate and display price range
+				const prices = data.prices.map((p) => p.amountMin).filter((p) => p);
+				const minPrice = Math.min(...prices);
+				const maxPrice = Math.max(...prices);
+				document.getElementById(
+					"priceRange"
+				).textContent = `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
+			}
+
+			fetchData();
+		</script>
+	</body>
+</html>

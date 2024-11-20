@@ -1,0 +1,33 @@
+{
+	"item_response": { "code": 200, "status": "OK", "message": "Data returned" },
+	"item_attributes": {
+		"title": "New Balance Women's 574 V2 Evergreen Sneaker, White/White, 7",
+		"upc": "739655530234",
+		"ean": "0739655530234",
+		"parent_category": "Apparel & Accessories",
+		"category": "Shoes",
+		"brand": "New Balance",
+		"model": "WL574EW",
+		"mpn": "WL574EW-100-7 B US",
+		"manufacturer": "New Balance",
+		"publisher": "New Balance",
+		"asin": "B06XWSSV9J",
+		"color": "White/White",
+		"size": "7",
+		"weight": "0.71 Pounds",
+		"image": "https://images.barcodespider.com/upcimage/739655530234.jpg",
+		"is_adult": "0",
+		"description": ""
+	},
+	"Stores": [
+		{
+			"store_name": "Amazon US",
+			"title": "New Balance Women's 574 V2 Evergreen Sneaker, White/White, 7",
+			"image": "https://m.media-amazon.com/images/I/41TxFUiNbXL._SL500_.jpg",
+			"price": "79.99",
+			"currency": "USD",
+			"link": "https://www.barcodespider.com/getstore/NzM5NjU1NTMwMjM0fEFtYXpvbiBVUw,,",
+			"updated": "2021-12-28 17:41:44"
+		}
+	]
+}
